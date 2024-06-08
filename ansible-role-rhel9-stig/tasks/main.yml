@@ -5272,7 +5272,6 @@
     -  result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
-  ignore_errors: true
   tags:
   - CCE-89732-2
   - NIST-800-53-AC-3
