@@ -1,4 +1,5 @@
 - hosts: 3.90.29.31
   user: root
   roles:
-    -  ansible-role-rhel9-stig
+   # -  ansible-role-rhel9-stig
+    - passed-task
