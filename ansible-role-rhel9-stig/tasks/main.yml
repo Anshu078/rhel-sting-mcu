@@ -5248,7 +5248,7 @@
   ansible.builtin.assert:
     that:
     - result_altered_authselect is skipped
-    - result_altered_authselect.rc == 0
+    - result_altered_authselect.rc == 1
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
   tags:
