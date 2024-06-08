@@ -1,5 +1,50 @@
 ---
 # tasks file for passed-task
+- name: Enable authselect - Select authselect profile
+  ansible.builtin.command:
+    cmd: authselect select "{{ var_authselect_profile }}"
+  register: result_authselect_select
+  failed_when: false
+  tags:
+  - CCE-89732-2
+  - NIST-800-53-AC-3
+  - configure_strategy
+  - enable_authselect
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - no_reboot_needed
+  when:
+  - configure_strategy | bool
+  - enable_authselect | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+
+- name: Enable authselect - Verify if PAM has been altered
+  ansible.builtin.command:
+    cmd: rpm -qV pam
+  register: result_altered_authselect
+  failed_when: false
+  when:
+  - configure_strategy | bool
+  - enable_authselect | bool
+  - low_complexity | bool
+  - medium_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - result_authselect_select.rc != 0
+  tags:
+  - CCE-89732-2
+  - NIST-800-53-AC-3
+  - configure_strategy
+  - enable_authselect
+  - low_complexity
+  - medium_disruption
+  - medium_severity
+  - no_reboot_needed
+
 - name: Debug result_altered_authselect
   ansible.builtin.debug:
     var: result_altered_authselect
