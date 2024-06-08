@@ -1634,6 +1634,16 @@
   - reboot_required
   - restrict_strategy
 
+- name: Enable FIPS mode
+  command: /usr/bin/fips-mode-setup --enable
+  register: fips_enable
+  changed_when: "'FIPS mode is enabled.' in fips_enable.stdout"
+
+- name: Reboot the instance
+  reboot:
+      reboot_timeout: 600
+  when: fips_enable.changed
+
 - name: Enable FIPS Mode - Check to See the Current Status of FIPS Mode
   ansible.builtin.command: /usr/bin/fips-mode-setup --check
   register: is_fips_enabled
