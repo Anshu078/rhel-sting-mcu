@@ -5244,7 +5244,7 @@
   ansible.builtin.command:
     cmd: rpm -qV pam
   register: result_altered_authselect
-  failed_when: false
+  failed_when: result_altered_authselect.rc != 0
   when:
   - configure_strategy | bool
   - enable_authselect | bool
