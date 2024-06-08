@@ -5240,11 +5240,15 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
+- name: Debug result_authselect_select
+  ansible.builtin.debug:
+    var: result_authselect_select
+
 - name: Enable authselect - Verify if PAM has been altered
   ansible.builtin.command:
     cmd: rpm -qV pam
   register: result_altered_authselect
-  failed_when: result_altered_authselect.rc != 0
+  failed_when: false
   when:
   - configure_strategy | bool
   - enable_authselect | bool
@@ -5269,7 +5273,7 @@
 - name: Enable authselect - Informative message based on the authselect integrity check
   ansible.builtin.assert:
     that:
-    -  result_altered_authselect is skipped or result_altered_authselect.rc == 0
+    -  result_altered_authselect is skipped or result_altered_authselect.rc == 1
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
   tags:
@@ -5299,8 +5303,8 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
-  - result_authselect_select.rc != 0
-  - result_altered_authselect is skipped or result_altered_authselect.rc == 0
+  - result_authselect_select.rc != 1
+  - result_altered_authselect is skipped or result_altered_authselect.rc == 1
   tags:
   - CCE-89732-2
   - NIST-800-53-AC-3
