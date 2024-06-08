@@ -1650,7 +1650,7 @@
 - name: Check FIPS mode status
   command: /usr/bin/fips-mode-setup --check
   register: fips_status
-  
+
 - name: Debug Check FIPS mode status
   debug:
     var: fips_status
@@ -5269,7 +5269,7 @@
 - name: Enable authselect - Informative message based on the authselect integrity check
   ansible.builtin.assert:
     that:
-    -  result_altered_authselect is skipped or result_altered_authselect.rc == 1
+    -  result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
   ignore_errors: true
