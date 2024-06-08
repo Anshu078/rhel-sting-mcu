@@ -5270,10 +5270,37 @@
   ansible.builtin.debug:
     var: result_altered_authselect
 
+- name: Re-run authselect with force if PAM files are altered
+  ansible.builtin.command:
+    cmd: authselect select sssd --force
+  when:
+        - configure_strategy | bool
+        - enable_authselect | bool
+        - low_complexity | bool
+        - medium_disruption | bool
+        - medium_severity | bool
+        - no_reboot_needed
+        - result_authselect_select.rc != 0
+        - result_altered_authselect.rc != 0
+  register: result_authselect_force
+  tags:
+        - CCE-89732-2
+        - NIST-800-53-AC-3
+        - configure_strategy
+        - enable_authselect
+        - low_complexity
+        - medium_disruption
+        - medium_severity
+        - no_reboot_needed
+
+- name: Debug result_altered_authselect
+  ansible.builtin.debug:
+    var: result_altered_authselect_force
+
 - name: Enable authselect - Informative message based on the authselect integrity check
   ansible.builtin.assert:
     that:
-    -  result_altered_authselect is skipped or result_altered_authselect.rc == 1
+    -  result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
   tags:
@@ -5303,8 +5330,8 @@
   - medium_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
-  - result_authselect_select.rc != 1
-  - result_altered_authselect is skipped or result_altered_authselect.rc == 1
+  - result_authselect_select.rc != 0
+  - result_altered_authselect is skipped or result_altered_authselect.rc == 0
   tags:
   - CCE-89732-2
   - NIST-800-53-AC-3
