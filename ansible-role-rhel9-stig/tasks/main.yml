@@ -1638,6 +1638,9 @@
   command: /usr/bin/fips-mode-setup --enable
   register: fips_enable
   changed_when: "'FIPS mode is enabled.' in fips_enable.stdout"
+- name: Debug fips_enable
+  debug:
+    var: fips_enable
 
 - name: Reboot the instance
   reboot:
