@@ -5575,6 +5575,9 @@
     register: result_authselect_check_cmd
     changed_when: false
     failed_when: false
+  - name: Debug result_authselect_check_cmd
+    ansible.builtin.debug:
+      var: result_authselect_check_cmd
   - name: Ensure PAM Displays Last Logon/Access Notification - Informative message based on the authselect integrity check
       result
     ansible.builtin.assert:
