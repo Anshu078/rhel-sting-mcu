@@ -14232,27 +14232,27 @@
     max_days: '{{ var_accounts_maximum_age_login_defs }}'
   with_items: '{{ user_names.stdout_lines }}'
   when:
-        - DISA_STIG_RHEL_09_411015 | bool
-        - accounts_password_set_max_life_existing | bool
-        - low_complexity | bool
-        - low_disruption | bool
-        - medium_severity | bool
-        - no_reboot_needed | bool
-        - restrict_strategy | bool
-        - user_names.stdout_lines | length > 0
+     - DISA_STIG_RHEL_09_411015 | bool
+     - accounts_password_set_max_life_existing | bool
+     - low_complexity | bool
+     - low_disruption | bool
+     - medium_severity | bool
+     - no_reboot_needed | bool
+     - restrict_strategy | bool
+     - user_names.stdout_lines | length > 0
   tags:
-        - CCE-86031-2
-        - DISA-STIG-RHEL-09-411015
-        - NIST-800-53-CM-6(a)
-        - NIST-800-53-IA-5(1)(d)
-        - NIST-800-53-IA-5(f)
-        - PCI-DSSv4-8.3.9
-        - accounts_password_set_max_life_existing
-        - low_complexity
-        - low_disruption
-        - medium_severity
-        - no_reboot_needed
-        - restrict_strategy
+     - CCE-86031-2
+     - DISA-STIG-RHEL-09-411015
+     - NIST-800-53-CM-6(a)
+     - NIST-800-53-IA-5(1)(d)
+     - NIST-800-53-IA-5(f)
+     - PCI-DSSv4-8.3.9
+     - accounts_password_set_max_life_existing
+     - low_complexity
+     - low_disruption
+     - medium_severity
+     - no_reboot_needed
+     - restrict_strategy
 
 - name: Change the maximum time period between password changes
   ansible.builtin.user:
