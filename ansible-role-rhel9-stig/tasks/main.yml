@@ -1637,7 +1637,7 @@
 - name: Enable FIPS mode
   command: /usr/bin/fips-mode-setup --enable
   register: fips_enable
-  changed_when: "'FIPS mode is enabled.' in fips_enable.stdout"
+  changed_when: "'Please reboot the system for the setting to take effect.' in fips_enable.stdout"
 - name: Debug fips_enable
   debug:
     var: fips_enable
