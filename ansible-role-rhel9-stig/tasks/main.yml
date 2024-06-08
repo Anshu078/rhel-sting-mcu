@@ -1650,7 +1650,7 @@
 - name: Enable FIPS Mode - Check to See the Current Status of FIPS Mode
   ansible.builtin.command: /usr/bin/fips-mode-setup --check
   register: is_fips_enabled
-  ignore_errors: true
+  ignore_errors: false
   changed_when: false
   when:
   - DISA_STIG_RHEL_09_671010 | bool
