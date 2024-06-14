@@ -1634,10 +1634,32 @@
   - reboot_required
   - restrict_strategy
 
+- name: Enable FIPS mode
+  command: /usr/bin/fips-mode-setup --enable
+  register: fips_enable
+  changed_when: "'Please reboot the system for the setting to take effect.' in fips_enable.stdout"
+- name: Debug fips_enable
+  debug:
+    var: fips_enable
+
+- name: Reboot the instance
+  reboot:
+      reboot_timeout: 600
+  when: fips_enable.changed
+
+- name: Check FIPS mode status
+  command: /usr/bin/fips-mode-setup --check
+  register: fips_status
+
+- name: Debug Check FIPS mode status
+  debug:
+    var: fips_status
+
+
 - name: Enable FIPS Mode - Check to See the Current Status of FIPS Mode
   ansible.builtin.command: /usr/bin/fips-mode-setup --check
   register: is_fips_enabled
-  ignore_errors: true
+  ignore_errors: false
   changed_when: false
   when:
   - DISA_STIG_RHEL_09_671010 | bool
@@ -5218,6 +5240,10 @@
   - medium_severity | bool
   - no_reboot_needed | bool
 
+- name: Debug result_authselect_select
+  ansible.builtin.debug:
+    var: result_authselect_select
+
 - name: Enable authselect - Verify if PAM has been altered
   ansible.builtin.command:
     cmd: rpm -qV pam
@@ -5240,11 +5266,41 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
+- name: Debug result_altered_authselect
+  ansible.builtin.debug:
+    var: result_altered_authselect
+
+- name: Re-run authselect with force if PAM files are altered
+  ansible.builtin.command:
+    cmd: authselect select sssd --force
+  when:
+        - configure_strategy | bool
+        - enable_authselect | bool
+        - low_complexity | bool
+        - medium_disruption | bool
+        - medium_severity | bool
+        - no_reboot_needed
+        - result_authselect_select.rc != 0
+        - result_altered_authselect.rc != 0
+  register: result_authselect_force
+  tags:
+        - CCE-89732-2
+        - NIST-800-53-AC-3
+        - configure_strategy
+        - enable_authselect
+        - low_complexity
+        - medium_disruption
+        - medium_severity
+        - no_reboot_needed
+
+- name: Debug result_altered_authselect
+  ansible.builtin.debug:
+    var: result_altered_authselect_force
 
 - name: Enable authselect - Informative message based on the authselect integrity check
   ansible.builtin.assert:
     that:
-    - result_altered_authselect is skipped or result_altered_authselect.rc == 0
+    -  result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
     - Files in the 'pam' package have been altered, so the authselect configuration won't be forced.
   tags:
@@ -5571,6 +5627,9 @@
     register: result_authselect_check_cmd
     changed_when: false
     failed_when: false
+  - name: Debug result_authselect_check_cmd
+    ansible.builtin.debug:
+      var: result_authselect_check_cmd
   - name: Ensure PAM Displays Last Logon/Access Notification - Informative message based on the authselect integrity check
       result
     ansible.builtin.assert:
@@ -14168,6 +14227,33 @@
   - restrict_strategy | bool
 
 - name: Change the maximum time period between password changes
+  ansible.builtin.command:
+    cmd: "chage -M '{{ var_accounts_maximum_age_login_defs }}' '{{ item }}'"
+  with_items: '{{ user_names.stdout_lines }}'
+  when:
+    - DISA_STIG_RHEL_09_411015 | bool
+    - accounts_password_set_max_life_existing | bool
+    - low_complexity | bool
+    - low_disruption | bool
+    - medium_severity | bool
+    - no_reboot_needed | bool
+    - restrict_strategy | bool
+    - user_names.stdout_lines | length > 0
+  tags:
+    - CCE-86031-2
+    - DISA-STIG-RHEL-09-411015
+    - NIST-800-53-CM-6(a)
+    - NIST-800-53-IA-5(1)(d)
+    - NIST-800-53-IA-5(f)
+    - PCI-DSSv4-8.3.9
+    - accounts_password_set_max_life_existing
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - restrict_strategy
+
+- name: Change the maximum time period between password changes
   ansible.builtin.user:
     user: '{{ item }}'
     password_expire_max: '{{ var_accounts_maximum_age_login_defs }}'
@@ -14194,6 +14280,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+  ignore_errors: true
 
 - name: Collect users with not correct minimum time period between password changes
   command: 'awk -F'':'' ''(/^[^:]+:[^!*]/ && ($4 < {{ var_accounts_minimum_age_login_defs }} || $4 == "")) {print $1}'' /etc/shadow
@@ -52876,6 +52963,10 @@
     changed_when: false
     with_items:
     - '{{ result_nmcli_cmd_connections_names.stdout_lines }}'
+  
+  - pause:
+      minutes: 2
+
   - name: Enable SSH Server firewalld Firewall Exception - Ensure NetworkManager connections are assigned to a firewalld zone
     ansible.builtin.command:
       cmd: nmcli connection modify {{ item.0 }} connection.zone {{ firewalld_sshd_zone }}
