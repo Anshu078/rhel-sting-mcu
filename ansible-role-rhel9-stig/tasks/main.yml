@@ -52963,6 +52963,10 @@
     changed_when: false
     with_items:
     - '{{ result_nmcli_cmd_connections_names.stdout_lines }}'
+  
+  - pause:
+      minutes: 2
+
   - name: Enable SSH Server firewalld Firewall Exception - Ensure NetworkManager connections are assigned to a firewalld zone
     ansible.builtin.command:
       cmd: nmcli connection modify {{ item.0 }} connection.zone {{ firewalld_sshd_zone }}
